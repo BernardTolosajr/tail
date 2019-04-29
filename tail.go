@@ -15,10 +15,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hpcloud/tail/ratelimiter"
-	"github.com/hpcloud/tail/util"
-	"github.com/hpcloud/tail/watch"
-	"gopkg.in/tomb.v1"
+	"github.com/BernardTolosajr/tail/ratelimiter"
+	"github.com/BernardTolosajr/tail/util"
+	"github.com/BernardTolosajr/tail/watch"
+	tomb "gopkg.in/tomb.v1"
 )
 
 var (
@@ -87,6 +87,8 @@ type Tail struct {
 	tomb.Tomb // provides: Done, Kill, Dying
 
 	lk sync.Mutex
+
+	Stopping chan bool
 }
 
 var (
@@ -227,6 +229,8 @@ func (tail *Tail) tailFileSync() {
 	defer tail.Done()
 	defer tail.close()
 
+	tail.Stopping = make(chan bool)
+
 	if !tail.MustExist {
 		// deferred first open.
 		err := tail.reopen()
@@ -309,6 +313,7 @@ func (tail *Tail) tailFileSync() {
 			// implementation (inotify or polling).
 			err := tail.waitForChanges()
 			if err != nil {
+				tail.Stopping <- true
 				if err != ErrStop {
 					tail.Kill(err)
 				}
