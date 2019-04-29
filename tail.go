@@ -367,7 +367,7 @@ func (tail *Tail) waitForChanges() error {
 			tail.openReader()
 			return nil
 		} else {
-			tail.Logger.Printf("Stopping tail as file no longer exists: %s", tail.Filename)
+			tail.Logger.Printf("Stop tail as file no longer exists: %s", tail.Filename)
 			return ErrStop
 		}
 	case <-tail.changes.Truncated:
