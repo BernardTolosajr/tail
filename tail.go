@@ -313,6 +313,7 @@ func (tail *Tail) tailFileSync() {
 			// implementation (inotify or polling).
 			err := tail.waitForChanges()
 			if err != nil {
+				fmt.Printf("error on changes %v", err)
 				tail.Stopping <- true
 				if err != ErrStop {
 					tail.Kill(err)
